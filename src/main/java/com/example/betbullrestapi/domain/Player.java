@@ -8,15 +8,16 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-public class TeamPlayer {
+public class Player {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String surname;
     private String numberOnJersey;
     private LocalDate careerStarted;
+    private LocalDate birthDate;
     private BigDecimal transferFee;
     @ManyToOne
     @JoinColumn(name = "team_id")
