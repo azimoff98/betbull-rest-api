@@ -68,6 +68,16 @@ public class TeamResource implements ApiBuilder{
 
     }
 
+    @GetMapping("/player/{playerId}")
+    public ResponseEntity<Team> findByPlayerId(@PathVariable Long playerId){
+        log.info("Rest request for team of player with id: {}", playerId);
+        Team response = teamService.findByPlayerId(playerId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
+
     @PostMapping
     public ResponseEntity<ApiMessage> save(@Valid @RequestBody TeamCreationRequest request){
         log.info("Rest request for team creation accepted");

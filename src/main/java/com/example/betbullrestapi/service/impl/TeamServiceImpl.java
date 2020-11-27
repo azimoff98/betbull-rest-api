@@ -55,6 +55,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public Team findByPlayerId(Long playerId) {
+        return teamRepository.findByPlayerId(playerId);
+    }
+
+    @Override
     public List<Team> findByName(String name) {
         return teamRepository.findByNames(name);
     }
