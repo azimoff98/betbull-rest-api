@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,7 +92,7 @@ public class PlayerResource implements ApiBuilder {
     }
 
     @PostMapping
-    public ResponseEntity<ApiMessage> create(@RequestBody PlayerCreationRequest request) {
+    public ResponseEntity<ApiMessage> create(@Valid @RequestBody PlayerCreationRequest request) {
         log.info("Rest request for creation player accepted");
         playerService.create(request);
 
@@ -110,7 +111,7 @@ public class PlayerResource implements ApiBuilder {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiMessage> update(@RequestBody PlayerUpdateRequest request, @PathVariable Long id) {
+    public ResponseEntity<ApiMessage> update(@Valid @RequestBody PlayerUpdateRequest request, @PathVariable Long id) {
         log.info("Rest request for updating player with id: {}", id);
 
         playerService.update(request, id);

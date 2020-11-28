@@ -10,6 +10,7 @@ public class PlayerMapper implements BaseMapper<PlayerDto, Player> {
 
     @Override
     public PlayerDto toDto(Player player) {
+        System.out.println(player);
         PlayerDto playerDto = new PlayerDto();
         playerDto.setId(player.getId());
         playerDto.setBirthDate(player.getBirthDate());
