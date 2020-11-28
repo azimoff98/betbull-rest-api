@@ -1,11 +1,14 @@
 package com.example.betbullrestapi.service.impl;
 
+import com.example.betbullrestapi.domain.Player;
 import com.example.betbullrestapi.domain.Team;
 import com.example.betbullrestapi.dto.vm.TeamCreationRequest;
 import com.example.betbullrestapi.dto.vm.TeamUpdateRequest;
 import com.example.betbullrestapi.exception.DomainNotFoundException;
+import com.example.betbullrestapi.exception.TransferException;
 import com.example.betbullrestapi.mapper.TeamCreationRequestMapper;
 import com.example.betbullrestapi.mapper.TeamUpdateRequestMapper;
+import com.example.betbullrestapi.repository.PlayerRepository;
 import com.example.betbullrestapi.repository.TeamRepository;
 import com.example.betbullrestapi.service.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +20,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+
+import static com.example.betbullrestapi.util.PlayerFeeDefiner.*;
 
 @Service
 @Slf4j
@@ -27,8 +33,9 @@ public class TeamServiceImpl implements TeamService {
 
 
     private final TeamRepository teamRepository;
+    private final PlayerRepository playerRepository;
     private final TeamCreationRequestMapper teamCreationRequestMapper;
-    private final TeamUpdateRequestMapper teamUpdateRequestMapper;
+
 
     @Override
     public void create(TeamCreationRequest request) {
@@ -76,6 +83,29 @@ public class TeamServiceImpl implements TeamService {
                 .orElseThrow(() -> new DomainNotFoundException("Team not found with id: " + id));
 
         teamRepository.save(teamUpdater(team, request));
+    }
+
+    @Override
+    public void transfer(Long teamId, Long playerId) {
+        log.info("Transfer process starting...");
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new DomainNotFoundException("No team found with id: " + teamId));
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new DomainNotFoundException("No player found with id: " + playerId));
+        if(team.getPlayers().contains(player)){
+            throw new TransferException("Player with id: " + playerId + " is already team member");
+        }
+        BigDecimal transferFeeWithCommission = definePlayerTransferFeeWithCommission(player);
+        log.info("Transfer fee for player with id: {} is : {}", playerId, transferFeeWithCommission);
+
+        if((team.getBudget().compareTo(transferFeeWithCommission)) < 0){
+            throw new TransferException("Team with id: " + teamId + " cannot transfer player with id: " + playerId + ". Budget is not enough for transfer");
+        }
+        log.info("Transfer completing process...");
+        player.setTeam(team);
+        playerRepository.save(player);
+        log.info("Transfer completed successfully..");
+
     }
 
     private Team teamUpdater(Team team, TeamUpdateRequest request){

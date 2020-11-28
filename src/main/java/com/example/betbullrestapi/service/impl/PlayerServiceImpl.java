@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
+import static com.example.betbullrestapi.util.PlayerFeeDefiner.definePlayerFee;
+
 /**
  * @author Gurban.Azimli
  * @date 2020/11/27 10:46 PM
@@ -34,7 +37,7 @@ public class PlayerServiceImpl implements PlayerService {
     public void create(PlayerCreationRequest request) {
         //first step calculate fee for player
         Player player = playerCreationRequestMapper.toEntity(request);
-        player.setTransferFee(PlayerFeeDefiner.definePlayerFee(player.getBirthDate(), player.getCareerStarted()));
+        player.setTransferFee(definePlayerFee(player.getBirthDate(), player.getCareerStarted()));
         //second step fetching team for player
         Team team = teamRepository.findById(request.getTeamId()).orElseThrow(
                 () -> new DomainNotFoundException("Provided id is wrong for team. No team found for adding player")
@@ -73,6 +76,49 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public void update(PlayerUpdateRequest request, Long id) {
+        log.info("Player updating process started");
+        Player player = playerRepository.findById(id)
+                .orElseThrow(() -> new DomainNotFoundException("No player found to update with id: " + id));
 
+        playerRepository.save(playerUpdater(player, request));
+    }
+
+    /**
+     * Every non-null field of request will be set to player with provided id.
+     * As transfer fee depends on months of career and age og player
+     * when changer are applied to player's careerStartedDate and birthDate
+     * transferFee will also change.
+     *
+     * @param player fetched player to update
+     * @param request incoming request
+     * @return updated player
+     */
+    private Player playerUpdater(Player player, PlayerUpdateRequest request){
+        if(request.getBirthDate() != null){
+            player.setBirthDate(request.getBirthDate());
+            player.setTransferFee(
+                    definePlayerFee(request.getBirthDate(), player.getCareerStarted())
+            );
+        }
+        if(request.getCareerStarted() != null) {
+            player.setCareerStarted(request.getCareerStarted());
+            player.setTransferFee(
+                    definePlayerFee(player.getBirthDate(), request.getCareerStarted())
+            );
+        }
+        if(request.getName() != null)
+            player.setName(request.getName());
+        if(request.getSurname() != null)
+            player.setSurname(request.getSurname());
+        if(request.getNumberOnJersey() != null)
+            player.setNumberOnJersey(request.getNumberOnJersey());
+        if(request.getTransferFee() != null)
+            player.setTransferFee(request.getTransferFee());
+        if(request.getTeamId() != null){
+            Team team = teamRepository.findById(request.getTeamId())
+                    .orElseThrow(() -> new DomainNotFoundException("No team found with id: " + request.getTeamId()));
+            player.setTeam(team);
+        }
+        return player;
     }
 }

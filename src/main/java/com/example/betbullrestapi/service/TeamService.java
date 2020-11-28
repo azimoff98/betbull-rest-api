@@ -17,4 +17,5 @@ public interface TeamService {
     List<Team> findByName(String name);
     void deleteById(long id);
     void update(TeamUpdateRequest request, Long id);
+    void transfer(Long teamId, Long playerId);
 }

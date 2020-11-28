@@ -2,8 +2,11 @@ package com.example.betbullrestapi.resource;
 
 import com.example.betbullrestapi.domain.Player;
 import com.example.betbullrestapi.dto.ApiMessage;
+import com.example.betbullrestapi.dto.PlayerDto;
 import com.example.betbullrestapi.dto.vm.PlayerCreationRequest;
 import com.example.betbullrestapi.dto.vm.PlayerUpdateRequest;
+import com.example.betbullrestapi.mapper.PlayerCreationRequestMapper;
+import com.example.betbullrestapi.mapper.PlayerMapper;
 import com.example.betbullrestapi.service.PlayerService;
 import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Gurban.Azimli
@@ -21,22 +25,25 @@ import java.util.List;
  *
  * PlayerResource class exports API for players.
  * Includes simple CRUD operations.
- *
  */
 @RestController
 @RequestMapping("/players")
 @Slf4j
 @RequiredArgsConstructor
-public class PlayerResource implements ApiBuilder{
+public class PlayerResource implements ApiBuilder {
 
 
     private final PlayerService playerService;
+    private final PlayerMapper playerMapper;
 
 
     @GetMapping
-    public ResponseEntity<List<Player>> findAll(){
+    public ResponseEntity<List<PlayerDto>> findAll() {
         log.info("Rest request for all players accepted");
-        List<Player> response = playerService.findAll();
+        List<PlayerDto> response = playerService.findAll()
+                .stream()
+                .map(playerMapper::toDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -45,9 +52,9 @@ public class PlayerResource implements ApiBuilder{
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Player> findById(@PathVariable Long id){
+    public ResponseEntity<PlayerDto> findById(@PathVariable Long id) {
         log.info("Rest request for player with id: {} accepted", id);
-        Player response = playerService.findById(id);
+        PlayerDto response = playerMapper.toDto(playerService.findById(id));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -55,9 +62,12 @@ public class PlayerResource implements ApiBuilder{
     }
 
     @GetMapping("/names")
-    public ResponseEntity<List<Player>> findByName(@RequestParam(name = "name") String name){
+    public ResponseEntity<List<PlayerDto>> findByName(@RequestParam(name = "name") String name) {
         log.info("Rest request for players with name like: {} accepted", name);
-        List<Player> response = playerService.findByName(name);
+        List<PlayerDto> response = playerService.findByName(name)
+                .stream()
+                .map(playerMapper::toDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -65,12 +75,15 @@ public class PlayerResource implements ApiBuilder{
     }
 
     @GetMapping("/pages")
-    public ResponseEntity<List<Player>> findWithPagination(@RequestParam(name = "pageIndex", defaultValue = "0") Integer index,
-                                                           @RequestParam(name = "pageSize", defaultValue = "10") Integer size){
+    public ResponseEntity<List<PlayerDto>> findWithPagination(@RequestParam(name = "pageIndex", defaultValue = "0") Integer index,
+                                                           @RequestParam(name = "pageSize", defaultValue = "10") Integer size) {
         int from = (index * size);
-        int to = ((index+1) * size);
+        int to = ((index + 1) * size);
         log.info("Rest request for teams from: {} to: {}", from, to);
-        List<Player> response = playerService.findWithPagination(index, size);
+        List<PlayerDto> response = playerService.findWithPagination(index, size)
+                .stream()
+                .map(playerMapper::toDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +91,7 @@ public class PlayerResource implements ApiBuilder{
     }
 
     @PostMapping
-    public ResponseEntity<ApiMessage> create(@RequestBody PlayerCreationRequest request){
+    public ResponseEntity<ApiMessage> create(@RequestBody PlayerCreationRequest request) {
         log.info("Rest request for creation player accepted");
         playerService.create(request);
 
@@ -88,7 +101,7 @@ public class PlayerResource implements ApiBuilder{
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiMessage> deleteById(@PathVariable Long id){
+    public ResponseEntity<ApiMessage> deleteById(@PathVariable Long id) {
         log.info("Rest request accepted for deleting player with id: {}", id);
         playerService.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
@@ -97,7 +110,7 @@ public class PlayerResource implements ApiBuilder{
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiMessage> update(@RequestBody PlayerUpdateRequest request, @PathVariable Long id){
+    public ResponseEntity<ApiMessage> update(@RequestBody PlayerUpdateRequest request, @PathVariable Long id) {
         log.info("Rest request for updating player with id: {}", id);
 
         playerService.update(request, id);

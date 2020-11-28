@@ -1,9 +1,10 @@
 package com.example.betbullrestapi.resource;
 
-import com.example.betbullrestapi.domain.Team;
 import com.example.betbullrestapi.dto.ApiMessage;
+import com.example.betbullrestapi.dto.TeamDto;
 import com.example.betbullrestapi.dto.vm.TeamCreationRequest;
 import com.example.betbullrestapi.dto.vm.TeamUpdateRequest;
+import com.example.betbullrestapi.mapper.TeamMapper;
 import com.example.betbullrestapi.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -23,13 +25,17 @@ import java.util.List;
 public class TeamResource implements ApiBuilder{
 
     private final TeamService teamService;
-
+    private final TeamMapper teamMapper;
 
 
     @GetMapping
-    public ResponseEntity<List<Team>> findAll(){
+    public ResponseEntity<List<TeamDto>> findAll(){
         log.info("Rest request for all teams accepted");
-        List<Team> response = teamService.findAll();
+        List<TeamDto> response = teamService.findAll()
+                .stream()
+                .map(teamMapper::toDto)
+                .collect(Collectors.toList());
+
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
@@ -37,31 +43,37 @@ public class TeamResource implements ApiBuilder{
     }
 
     @GetMapping("/pages")
-    public ResponseEntity<List<Team>> findWithPagination(@RequestParam(name = "pageIndex", defaultValue = "0") Integer index,
+    public ResponseEntity<List<TeamDto>> findWithPagination(@RequestParam(name = "pageIndex", defaultValue = "0") Integer index,
                                                          @RequestParam(name = "pageSize", defaultValue = "10") Integer size){
 
         int from = (index * size);
         int to = ((index+1) * size);
         log.info("Rest request for teams from: {} to: {}", from, to);
-        List<Team> response = teamService.findWithPagination(index, size);
+        List<TeamDto> response = teamService.findWithPagination(index, size)
+                .stream()
+                .map(teamMapper::toDto)
+                .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Team> findById(@PathVariable Long id){
+    public ResponseEntity<TeamDto> findById(@PathVariable Long id){
         log.info("Rest request accepted for team with id: {}", id);
-        Team response = teamService.findById(id);
+        TeamDto response = teamMapper.toDto(teamService.findById(id));
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
 
     @GetMapping("/name")
-    public ResponseEntity<List<Team>> findByName(@RequestParam(name = "name") String name){
+    public ResponseEntity<List<TeamDto>> findByName(@RequestParam(name = "name") String name){
         log.info("Rest request for teams with name like: {}", name);
-        List<Team> response = teamService.findByName(name);
+        List<TeamDto> response = teamService.findByName(name)
+                .stream()
+                .map(teamMapper::toDto)
+                .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
@@ -69,9 +81,9 @@ public class TeamResource implements ApiBuilder{
     }
 
     @GetMapping("/player/{playerId}")
-    public ResponseEntity<Team> findByPlayerId(@PathVariable Long playerId){
+    public ResponseEntity<TeamDto> findByPlayerId(@PathVariable Long playerId){
         log.info("Rest request for team of player with id: {}", playerId);
-        Team response = teamService.findByPlayerId(playerId);
+        TeamDto response = teamMapper.toDto(teamService.findByPlayerId(playerId));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -104,5 +116,15 @@ public class TeamResource implements ApiBuilder{
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(generateAccepted());
+    }
+
+    @PutMapping("/{teamId}/players/{playerId}")
+    public ResponseEntity<ApiMessage> transfer(@PathVariable(name = "teamId") Long teamId,
+                                               @PathVariable(name = "playerId") Long playerId){
+        log.info("Rest request to transfer player with id: {} to team with id: {}", playerId, teamId);
+        teamService.transfer(teamId, playerId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(generateOkay());
     }
 }
