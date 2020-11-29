@@ -1,6 +1,6 @@
 package com.example.betbullrestapi.repository;
 
-import com.example.betbullrestapi.domain.Team;
+import com.example.betbullrestapi.domains.Team;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
