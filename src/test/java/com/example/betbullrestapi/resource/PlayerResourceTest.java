@@ -103,10 +103,13 @@ public class PlayerResourceTest {
                 LocalDate.of(2015, 5, 10), LocalDate.of(1995, 10, 15),
                 BigDecimal.valueOf(100_000), null);
 
-        final PlayerDto converted = playerMapper.toDto(player);
+        final PlayerDto converted = new PlayerDto(5L, "test name", "test surname", "10",
+                LocalDate.of(2015, 5, 10), LocalDate.of(1995, 10, 15),
+                BigDecimal.valueOf(100_000));
         final String expected = objectMapper.writeValueAsString(converted);
 
         given(playerService.findById(id)).willReturn(player);
+        given(playerMapper.toDto(player)).willReturn(converted);
         System.out.println("domain: " + player);
         System.out.println("dto: " + converted);
         mockMvc.perform(

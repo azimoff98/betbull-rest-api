@@ -67,7 +67,7 @@ public class TeamResource implements ApiBuilder{
                 .body(response);
     }
 
-    @GetMapping("/name")
+    @GetMapping("/names")
     public ResponseEntity<List<TeamDto>> findByName(@RequestParam(name = "name") String name){
         log.info("Rest request for teams with name like: {}", name);
         List<TeamDto> response = teamService.findByName(name)
@@ -91,7 +91,7 @@ public class TeamResource implements ApiBuilder{
     }
 
     @PostMapping
-    public ResponseEntity<ApiMessage> save(@Valid @RequestBody TeamCreationRequest request){
+    public ResponseEntity<ApiMessage> create(@Valid @RequestBody TeamCreationRequest request){
         log.info("Rest request for team creation accepted");
         teamService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -109,7 +109,7 @@ public class TeamResource implements ApiBuilder{
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiMessage> update(@RequestBody TeamUpdateRequest request, @PathVariable Long id){
+    public ResponseEntity<ApiMessage> update(@Valid @RequestBody TeamUpdateRequest request, @PathVariable Long id){
         log.info("Rest request for updating team with id: {}", id);
         teamService.update(request, id);
 
