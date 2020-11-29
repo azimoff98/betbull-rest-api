@@ -42,13 +42,13 @@ public class PlayerServiceTest {
 
     @InjectMocks
     private PlayerServiceImpl playerService;
-    @MockBean
+    @Mock
     private PlayerRepository playerRepository;
-    @MockBean
+    @Mock
     private TeamRepository teamRepository;
-    @MockBean
+    @Mock
     private FeeDefinerServiceImpl feeDefinerService;
-    @MockBean
+    @Mock
     private PlayerCreationRequestMapper playerCreationRequestMapper;
 
     @Test
@@ -59,9 +59,15 @@ public class PlayerServiceTest {
                 new Player(1L, "Name", "Surname", "10", LocalDate.of(2020,11,20),
                         LocalDate.of(2000,10,10), BigDecimal.valueOf(100_000), null)
         );
-        given(playerRepository.findAll()).willReturn(players);
+        when(playerRepository.findAll()).thenReturn(players);
+
         List<Player> response = playerService.findAll();
+        assertEquals(response.size(), players.size());
         assertEquals(response.get(0).getBirthDate(), players.get(0).getBirthDate());
+        assertEquals(response.get(0).getCareerStarted(), players.get(0).getCareerStarted());
+        assertEquals(response.get(0).getName(), players.get(0).getName());
+        assertEquals(response.get(0).getSurname(), players.get(0).getSurname());
+        assertEquals(response.get(0).getNumberOnJersey(), players.get(0).getNumberOnJersey());
     }
 
     @Test
@@ -82,8 +88,10 @@ public class PlayerServiceTest {
         given(feeDefinerService.definePlayerFee(request.getBirthDate(), request.getCareerStarted())).willReturn(BigDecimal.valueOf(100_000));
         when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(team));
         when(playerCreationRequestMapper.toEntity(request)).thenReturn(player);
-//        doNothing().when(playerRepository).save(player);
 
+        playerService.create(request);
+
+        verify(playerRepository, times(1)).save(player);
 
 
 
