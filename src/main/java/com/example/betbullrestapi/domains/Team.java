@@ -20,6 +20,7 @@ public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, length = 30)
     private String teamName;
     private LocalDate establishmentDate;
     private BigDecimal budget;

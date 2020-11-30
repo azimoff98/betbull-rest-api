@@ -19,8 +19,11 @@ public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, length = 30)
     private String name;
+    @Column(nullable = false, length = 30)
     private String surname;
+    @Column(nullable = false, length = 4)
     private String numberOnJersey;
     private LocalDate careerStarted;
     private LocalDate birthDate;

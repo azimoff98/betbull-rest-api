@@ -18,6 +18,13 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author Gurban.Azimli
+ * @date 2020/11/27 9:43 PM
+ *
+ * TeamResource class exports API for teams.
+ * Includes simple CRUD operations and transfer functionality.
+ */
 @RestController
 @Slf4j
 @RequiredArgsConstructor
