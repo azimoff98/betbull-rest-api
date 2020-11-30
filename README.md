@@ -21,7 +21,7 @@ same resource.
 
 All Api are exported with **swagger documentation**.
 
-* [Swagger documentation reference] (http:localhost:8080/swagger-ui.html)
+* [Swagger documentation reference](http:localhost:8080/swagger-ui.html)
 
 
  
