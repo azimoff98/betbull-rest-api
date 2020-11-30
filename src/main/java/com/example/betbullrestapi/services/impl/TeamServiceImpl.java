@@ -99,6 +99,8 @@ public class TeamServiceImpl implements TeamService {
         log.info("Transfer completing process...");
         player.setTeam(team);
         playerRepository.save(player);
+        team.setBudget(team.getBudget().subtract(transferFeeWithCommission));
+        teamRepository.save(team);
         log.info("Transfer completed successfully..");
 
     }

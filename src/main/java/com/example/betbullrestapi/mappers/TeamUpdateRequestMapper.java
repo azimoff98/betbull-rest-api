@@ -22,6 +22,6 @@ public class TeamUpdateRequestMapper implements BaseMapper<TeamUpdateRequest, Te
         team.setEstablishmentDate(request.getEstablishmentDate());
         team.setPlayers(Collections.EMPTY_LIST);
 
-        return null;
+        return team;
     }
 }
